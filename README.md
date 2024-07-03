@@ -1,7 +1,7 @@
 # Software-Design-and-Development
 LAB for Software Design and Development
 
-# Download Program for Lab
+# Download Program Server and Virtual Machine for Lab
 * XAMPP Stack 8.0.30 : https://www.apachefriends.org/download.html
 * MySQL Workbench : https://www.mysql.com/products/workbench/
 * Beekeeper Studio : https://github.com/beekeeper-studio/beekeeper-studio/releases
