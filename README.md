@@ -11,4 +11,4 @@ LAB for Software Design and Development
 * git : https://git-scm.com/download/win
 * VS Code : https://code.visualstudio.com/download
 * VMWare Workstation 17 Player : https://www.vmware.com/products/workstation-player/workstation-player-evaluation.html.html
-* Ubuntu 24.04 LTS : https://ubuntu.com/download/desktop
+* Ubuntu Server 24.04 LTS : https://ubuntu.com/download/server/thank-you?version=24.04&architecture=amd64&lts=true
