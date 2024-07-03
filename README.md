@@ -10,3 +10,5 @@ LAB for Software Design and Development
 * Nodejs : https://nodejs.org/en/download/package-manager
 * git : https://git-scm.com/download/win
 * VS Code : https://code.visualstudio.com/download
+* VMWare Workstation 17 Player : https://www.vmware.com/products/workstation-player/workstation-player-evaluation.html.html
+* Ubuntu 24.04 LTS : https://ubuntu.com/download/desktop
