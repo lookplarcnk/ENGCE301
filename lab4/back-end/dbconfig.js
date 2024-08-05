@@ -1,19 +1,17 @@
 var dbconfig = {
     development: {
-        //connectionLimit : 10,
-        host     : 'localhost',
-        port     : '3306',
-        user     : 'root',
-        password : '',
-        database : 'moviedb'
+        host: 'localhost',
+        port: '3306',
+        user: 'root',
+        password: 'root',
+        database: 'moviedb'
     },
     production: {
-        //connectionLimit : 10,
-        host     : 'localhost',
-        port     : '3306',
-        user     : 'root',
-        password : '',
-        database : 'moviedb'
+        host: 'localhost',
+        port: '3306',
+        user: 'root',
+        password: 'root',
+        database: 'moviedb'
     }
-    };
+};
 module.exports = dbconfig;
