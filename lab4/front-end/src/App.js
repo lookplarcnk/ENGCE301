@@ -48,7 +48,7 @@ function App() {
 
   const movieDelete = (e) => {
     console.log(delete_data.delete_movie);
-    deleteMovie(delete_data.delete_movie)
+    DeleteMovie(delete_data.delete_movie)
       .then(movies => {
         console.log(movies.data);
         setNumberOfMovies(numberOfMovies - 1);
