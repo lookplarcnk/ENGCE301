@@ -1,198 +1,123 @@
-var mysql = require('mysql');
-const env = require('../env.js');
+const mysql = require('mysql2/promise'); // ใช้ mysql2/promise แทน mysql
+const env = process.env.NODE_ENV || 'development';
 const config = require('../dbconfig.js')[env];
 
-/*
 async function getMovieList() {
+    const pool = await mysql.createPool(config);
 
-    var Query;
-    var pool  = mysql.createPool(config);
-    
-    return new Promise((resolve, reject) => {
-
-       //Query = `SELECT * FROM movies WHERE warehouse_status = 1 ORDER BY CONVERT( warehouse_name USING tis620 ) ASC `;
-         Query = `SELECT * FROM movies`;
- 
-         pool.query(Query, function (error, results, fields) {
-            if (error) throw error;
-
-            if (results.length > 0) {
-                pool.end();
-                return resolve({
-                    statusCode: 200,
-                    returnCode: 1,
-                    data: results,
-                });   
-            } else {
-                pool.end();
-                return resolve({
-                    statusCode: 404,
-                    returnCode: 11,
-                    message: 'No movie found',
-                });
-            }
-
-        });
-
-    });
-    
-
+    try {
+        const [rows] = await pool.query('SELECT * FROM movies');
+        if (rows.length > 0) {
+            return rows;
+        } else {
+            return {
+                statusCode: 404,
+                returnCode: 11,
+                message: 'No movie found',
+            };
+        }
+    } catch (error) {
+        throw error;
+    } finally {
+        await pool.end(); // ปิดการเชื่อมต่อหลังจากเสร็จสิ้น
+    }
 }
-*/
-
-
-
-async function getMovieList() {
-
-    var Query;
-    var pool  = mysql.createPool(config);
-    
-    return new Promise((resolve, reject) => {
-
-       //Query = `SELECT * FROM movies WHERE warehouse_status = 1 ORDER BY CONVERT( warehouse_name USING tis620 ) ASC `;
-         Query = `SELECT * FROM movies`;
- 
-         pool.query(Query, function (error, results, fields) {
-            if (error) throw error;
-
-            if (results.length > 0) {
-                pool.end();
-                return resolve(results);   
-            } else {
-                pool.end();
-                return resolve({
-                    statusCode: 404,
-                    returnCode: 11,
-                    message: 'No movie found',
-                });
-            }
-
-        });
-
-    });
-    
-
-}
-
 
 async function getMovieSearch(search_text) {
+    const pool = await mysql.createPool(config);
 
-    var Query;
-    var pool  = mysql.createPool(config);
-    
-    return new Promise((resolve, reject) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM movies WHERE title LIKE ?', [`%${search_text}%`]);
+        if (rows.length > 0) {
+            return {
+                statusCode: 200,
+                returnCode: 1,
+                data: rows,
+            };
+        } else {
+            return {
+                statusCode: 404,
+                returnCode: 11,
+                message: 'No movie found',
+            };
+        }
+    } catch (error) {
+        throw error;
+    } finally {
+        await pool.end(); // ปิดการเชื่อมต่อหลังจากเสร็จสิ้น
+    }
+}
 
-        Query = `SELECT * FROM movies WHERE title LIKE '%${search_text}%'`;
- 
-         pool.query(Query, function (error, results, fields) {
-            if (error) throw error;
+async function postMovie(title, genre, director, release_year) {
+    const pool = await mysql.createPool(config);
 
-            if (results.length > 0) {
-                pool.end();
-                return resolve({
-                    statusCode: 200,
-                    returnCode: 1,
-                    data: results,
-                });   
-            } else {
-                pool.end();
-                return resolve({
-                    statusCode: 404,
-                    returnCode: 11,
-                    message: 'No movie found',
-                });
-            }
+    try {
+        const post = { title, genre, director, release_year };
+        const [result] = await pool.query('INSERT INTO movies SET ?', post);
+        return {
+            statusCode: 200,
+            returnCode: 1,
+            message: 'Movie was inserted',
+        };
+    } catch (error) {
+        throw error;
+    } finally {
+        await pool.end(); // ปิดการเชื่อมต่อหลังจากเสร็จสิ้น
+    }
+}
 
-        });
+async function insertMovie(title, genre, director, release_year) {
+    const pool = await mysql.createPool(config);
 
-    });
-
+    try {
+        const [result] = await pool.query('INSERT INTO movies SET ?', movieData);
+        return {
+            statusCode: 200,
+            returnCode: 1,
+            message: 'Movie was inserted',
+            data: result,
+        };
+    } catch (error) {
+        throw error;
+    } finally {
+        await pool.end(); // ปิดการเชื่อมต่อหลังจากเสร็จสิ้น
+    }
 }
 
 async function deleteMovie(delete_movie) {
+    const pool = await mysql.createPool(config); // สร้าง pool ใหม่ทุกครั้ง
 
-    var Query;
-    var pool  = mysql.createPool(config);
-    
-    return new Promise((resolve, reject) => {
+    try {
+        const query = 'DELETE FROM movies WHERE title LIKE ?'; // ใช้ placeholder เพื่อป้องกัน SQL Injection
+        const [result] = await pool.query(query, [`%${delete_movie}%`]); // ใช้ query กับ parameterized value
 
-        Query = `DELETE FROM movies WHERE title LIKE '%${delete_movie}%'`;
- 
-         pool.query(Query, function (error, results, fields) {
-            if (error) throw error;
-
-            if (results.affectedRows > 0) {
-                pool.end();
-                return resolve({
-                    statusCode: 200,
-                    returnCode: 1,
-                    data: "Movie was delete!",
-                });   
-            } else {
-                pool.end();
-                return resolve({
-                    statusCode: 404,
-                    returnCode: 11,
-                    message: 'No movie found',
-                });
-            }
-
-        });
-
-    });
-
-
+        if (result.affectedRows > 0) {
+            return {
+                statusCode: 200,
+                returnCode: 1,
+                message: 'Movie was deleted',
+                affectedRows: result.affectedRows,
+            };
+        } else {
+            return {
+                statusCode: 404,
+                returnCode: 11,
+                message: 'No movie found with the given title',
+            };
+        }
+    } catch (error) {
+        console.error('Error occurred in deleteMovie function:', error); // บันทึกข้อผิดพลาด
+        throw error;
+    } finally {
+        await pool.end(); // ปิดการเชื่อมต่อหลังจากเสร็จสิ้น
+    }
 }
 
-async function postMovie(p_title,p_genre,p_director,p_release_year) {
 
-    var Query;
-    var pool  = mysql.createPool(config);
-    
-    return new Promise((resolve, reject) => {
-
-        //Query = `SELECT * FROM movies WHERE title LIKE '%${search_text}%'`;
-
-        var post  = {
-            title: p_title, 
-            genre: p_genre,
-            director: p_director,
-            release_year: p_release_year
-        };
-
-        console.log('post is: ', post); 
-
-     
-        Query = 'INSERT INTO movies SET ?';
-        pool.query(Query, post, function (error, results, fields) {
-        //pool.query(Query, function (error, results, fields) {
-
-        if (error) return reject(error);
-
-            if ( results.affectedRows > 0) {
-                pool.end();
-                return resolve({
-                    statusCode: 200,
-                    returnCode: 1,
-                    messsage: 'Movie list was inserted',
-                });   
-            }
-
-
-        });
-
-
-    });
-
-
-}
 
 module.exports.MovieRepo = {
     getMovieList: getMovieList,
     getMovieSearch: getMovieSearch,
     postMovie: postMovie,
     deleteMovie: deleteMovie,
-    
 };
-
-
