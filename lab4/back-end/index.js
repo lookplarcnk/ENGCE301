@@ -59,140 +59,130 @@ const init = async () => {
   });
 
 
-    //API: http://localhost:3001/api/movie/all
-    server.route({
-      method: 'GET',
-      path: '/api/movie/all',
-      config: {
-          cors: {
-              origin: ['*'],
-              additionalHeaders: ['cache-control', 'x-requested-width']
-          }
-      },
-      handler: async function (request, reply) {
-          //var param = request.query;
-          //const category_code = param.category_code;
-
-          try {
-
-              const responsedata = await Movies.MovieRepo.getMovieList();
-              if (responsedata.error) {
-                  return responsedata.errMessage;
-              } else {
-                  return responsedata;
-              }
-          } catch (err) {
-              server.log(["error", "home"], err);
-              return err;
-          }
-          
-      }
-  });
-
-    server.route({
-      method: 'GET',
-      path: '/api/movie/search',
-      config: {
-          cors: {
-              origin: ['*'],
-              additionalHeaders: ['cache-control', 'x-requested-width']
-          }
-      },
-      handler: async function (request, reply) {
-          var param = request.query;
-          const search_text = param.search_text;
-          //const title = param.title;
-
-          try {
-
-            const responsedata = await Movies.MovieRepo.getMovieSearch(search_text);
-            if (responsedata.error) {
-                return responsedata.errMessage;
-            } else {
-                return responsedata;
-            }
-        } catch (err) {
-            server.log(["error", "home"], err);
-            return err;
-        }
-
-      }
-  });
-
+  //API: http://localhost:3001/api/movie/all
   server.route({
-    method: 'POST',
-    path: '/api/movie/delete',
+    method: 'GET',
+    path: '/api/movie/all',
     config: {
-        cors: {
-            origin: ['*'],
-            additionalHeaders: ['cache-control', 'x-requested-width']
+      cors: {
+        origin: ['*'],
+        additionalHeaders: ['cache-control', 'x-requested-width']
+      }
+    },
+    handler: async function (request, h) {
+      try {
+        const responsedata = await Movies.MovieRepo.getMovieList();
+        if (responsedata.error) {
+          return h.response(responsedata.errMessage).code(500);
+        } else {
+          return h.response(responsedata).type('application/json');
         }
+      } catch (err) {
+        server.log(["error", "home"], err);
+        return h.response({ error: err.message }).code(500);
+      }
+    }
+  });  
+
+  //API: http://localhost:3001/api/movie/search
+  server.route({
+    method: 'GET',
+    path: '/api/movie/search',
+    config: {
+      cors: {
+        origin: ['*'],
+        additionalHeaders: ['cache-control', 'x-requested-width']
+      }
     },
     handler: async function (request, reply) {
-        var param = request.query;
-        const delete_movie = param.delete_movie;
-        //const title = param.title;
+      var param = request.query;
+      const search_text = param.search_text;
+      //const title = param.title;
 
-        try {
+      try {
 
-          const responsedata = await Movies.MovieRepo.deleteMovie(delete_movie);
-          if (responsedata.error) {
-              return responsedata.errMessage;
-          } else {
-              return responsedata;
-          }
+        const responsedata = await Movies.MovieRepo.getMovieSearch(search_text);
+        if (responsedata.error) {
+          return responsedata.errMessage;
+        } else {
+          return responsedata;
+        }
       } catch (err) {
-          server.log(["error", "home"], err);
-          return err;
+        server.log(["error", "home"], err);
+        return err;
       }
 
     }
-});
+  });
 
 
+  //API: http://localhost:3001/api/movie/insert
   server.route({
     method: 'POST',
     path: '/api/movie/insert',
     config: {
-        payload: {
-            multipart: true,
-        },
-        cors: {
-            origin: ['*'],
-            additionalHeaders: ['cache-control', 'x-requested-width']
-        }
+      payload: {
+        multipart: true,
+      },
+      cors: {
+        origin: ['*'],
+        additionalHeaders: ['cache-control', 'x-requested-width']
+      }
     },
+    
     handler: async function (request, reply) {
-
-        const {
-          title,
-          genre,
-          director,
-          release_year
-        } = request.payload;
-
-        //const title = request.payload.title;
-        //const genre = request.payload.genre;
-
-        try {
-
-          const responsedata = await Movies.MovieRepo.postMovie(title, genre, director,release_year);
-          if (responsedata.error) {
-              return responsedata.errMessage;
-          } else {
-              return responsedata;
-          }
+      const {
+        title,
+        genre,
+        director,
+        release_year
+      } = request.payload;
+      try {
+        const responsedata = await Movies.MovieRepo.postMovie(title, genre, director, release_year);
+        if (responsedata.error) {
+          return responsedata.errMessage;
+        } else {
+          return responsedata;
+        }
       } catch (err) {
-          server.log(["error", "home"], err);
-          return err;
+        server.log(["error", "home"], err);
+        return err;
+      }
+    }
+  });
+
+  //API: http://localhost:3001/api/movie/delete
+  server.route({
+    method: 'POST',
+    path: '/api/movie/delete',
+    config: {
+      cors: {
+        origin: ['*'],
+        additionalHeaders: ['cache-control', 'x-requested-width']
+      }
+    },
+
+    handler: async function (request, reply) {
+      var param = request.query;
+      const delete_movie = param.delete_movie;
+      //const title = param.title;
+
+      try {
+
+        const responsedata = await Movies.MovieRepo.deleteMovie(delete_movie);
+        if (responsedata.error) {
+          return responsedata.errMessage;
+        } else {
+          return responsedata;
+        }
+      } catch (err) {
+        server.log(["error", "home"], err);
+        return err;
       }
 
     }
-});
-
-
-
-
+  });
+  
   await server.start();
   console.log('API Server running on %s', server.info.uri);
 
@@ -207,4 +197,3 @@ process.on('unhandledRejection', (err) => {
 });
 
 init();
-
