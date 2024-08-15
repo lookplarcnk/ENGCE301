@@ -29,7 +29,6 @@ export async function getAllMovies() {
     
 }
 
-//---- ยังไม่เสร็จ ----
 export async function createMovie(data) {
     const response = await fetch(`http://localhost:3001/api/movie/insert`, {
         method: 'POST',
